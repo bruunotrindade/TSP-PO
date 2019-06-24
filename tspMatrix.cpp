@@ -15,22 +15,23 @@ int calculateTourDistance(int *tour)//calculate the distance of a tour
 	return dist;
 }
 
-vector<string> split(const string& str, const string& delim)
+vector<string> split(string str, char del)
 {
     vector<string> tokens;
-    size_t prev = 0, pos = 0;
-    do
+    string s = "";
+    for(int i = 0; i < str.size(); ++i)
     {
-        pos = str.find(delim, prev);
-        if (pos == string::npos) pos = str.length();
-        string token = str.substr(prev, pos-prev);
-        if (!token.empty()) tokens.push_back(token);
-        prev = pos + delim.length();
+        if(str[i] == del)
+        {
+            tokens.push_back(s);
+            s = "";
+        }
+        else
+            s += str[i];
     }
-    while (pos < str.length() && prev < str.length());
+    tokens.push_back(s);
     return tokens;
 }
-
 
 int main(const int argc, const char **inputFile)
 {
@@ -56,13 +57,18 @@ int main(const int argc, const char **inputFile)
         while(getline(file, s))
         {
             if(s.size()-1 > 0)
-                s[s.size()-1] = '\0';
+                s = s.substr(0, s.size()-1);
+
             if(('\r' == s[s.size()-1]))//in some files there is a carriage return at the end, don't know why. This command removes it
-                s[s.size()-1]=0;
+                s[s.size()-1] = 0;
 
-            vector<string> splitted = split(s, " ");
-            string value1 = splitted[0], value2 = splitted[1], value3 = splitted[2];
+            vector<string> splitted = split(s, ' ');
+            string value1 = splitted[0], value2, value3;
+            if(splitted.size() == 3)
+                value2 = splitted[1], value3 = splitted[2];
 
+
+            cout << value1 << " " << value2 << " " << value3 << endl;
             if(value1 == "EDGE_WEIGHT_TYPE")
             {
                 if(value3 != "EUC_2D" && value3 != "ATT" && value3 != "CEIL_2D")
@@ -75,13 +81,11 @@ int main(const int argc, const char **inputFile)
             }
             else if(value1 == "TYPE" && value3 != "TSP")
             { //verify if the instance is of type TSP, the other types will not be considered
-                cout << value1 << "'" << value3 << "'"<< endl;
                 fprintf(stderr,"\nERROR! tsp file is not of type TSP, aborting!!\n");
                 exit(1);
             }
             else if(value1 == "DIMENSION")
             {//read the dimension from the header and allocate memory for the cities
-                cout << "VALUE3 = " << value3 << endl;
                 size = stoi(value3);
                 distanceMatrix = (int**)malloc(size * sizeof(int*));
                 x = (double*)malloc(size * sizeof(double*));
@@ -90,7 +94,6 @@ int main(const int argc, const char **inputFile)
                 for(int i = 0; i < size; i++)
                     distanceMatrix[i] = (int*)malloc(size * sizeof(int));
             }
-
             try
             {
                 if(stoi(value1))
@@ -109,9 +112,9 @@ int main(const int argc, const char **inputFile)
             {
             }
         }
-
         file.close();
     }
+
 
     if(type == "EUC_2D")
 	{
@@ -123,6 +126,7 @@ int main(const int argc, const char **inputFile)
 				double yd = y[i]-y[j];
 				double dist = sqrt(xd*xd+yd*yd);
 				distanceMatrix[i][j] = (int)(dist+0.5);//calculating the euclidean distance, rounding to int and storing in the distance matrix
+                //cout << distanceMatrix[i][j] << " ";
 			}
 		}
 	}
