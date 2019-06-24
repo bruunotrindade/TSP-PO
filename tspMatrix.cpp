@@ -1,15 +1,20 @@
-#include <stdio.h> // print, fgets function
-#include <stdlib.h> // exit, atoi function
-#include <string.h> //strlen function
-#include <math.h> // sqrt function
-#include <algorithm>    // std::min
-#include <limits.h> // INT_MAX
-#include <time.h>
+#include <bits/stdc++.h>
 
-
-int calculateTourDistance(int *tour);//calculate the distance of a tour
+using namespace std;
 
 int **distanceMatrix, size=-1, pos=0;
+
+int calculateTourDistance(int *tour)//calculate the distance of a tour
+{
+	int dist=0;
+	for(int i=0; i<size-1; i++)
+	{
+		dist+=distanceMatrix[tour[i]][tour[i+1]];
+	}
+	dist+=distanceMatrix[tour[size-1]][tour[0]];
+	return dist;
+}
+
 
 int main(const int argc, const char **inputFile)
 {
@@ -28,6 +33,19 @@ int main(const int argc, const char **inputFile)
 		fprintf(stderr,"\nFail to Open tsp File!!\n");
 		exit(1);
 	}
+
+	string line;
+    ifstream file(inputFile[1]);
+    if (file.is_open())
+    {
+        while(getline(file, line))
+            cout << line << '\n';
+
+        file.close();
+    }
+	/*
+
+
 	while(fgets(s,500,stream))
 	{ //read every line (not larger than 500 chars) of the input
 		if(strlen(s)-1>0) //remove the last break line of the line
@@ -128,16 +146,5 @@ int main(const int argc, const char **inputFile)
 	for(int i=0; i<size; i++)
 		tour[i]=i;
 
-	printf("Comprimento da rota: %d\n", calculateTourDistance(tour));
-}
-
-int calculateTourDistance(int *tour)
-{
-	int dist=0;
-	for(int i=0; i<size-1; i++)
-	{
-		dist+=distanceMatrix[tour[i]][tour[i+1]];
-	}
-	dist+=distanceMatrix[tour[size-1]][tour[0]];
-	return dist;
+	printf("Comprimento da rota: %d\n", calculateTourDistance(tour));*/
 }
