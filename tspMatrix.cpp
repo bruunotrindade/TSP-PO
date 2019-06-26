@@ -6,31 +6,32 @@ int **distanceMatrix, size=-1, pos=0;
 
 int calculateTourDistance(int *tour)//calculate the distance of a tour
 {
-	int dist=0;
-	for(int i=0; i<size-1; i++)
+	int dist = 0;
+	for(int i = 0; i < size-1; i++)
 	{
-		dist+=distanceMatrix[tour[i]][tour[i+1]];
+		dist += distanceMatrix[tour[i]][tour[i+1]];
 	}
-	dist+=distanceMatrix[tour[size-1]][tour[0]];
+	dist += distanceMatrix[tour[size-1]][tour[0]];
 	return dist;
 }
 
-vector<string> split(string str, char del)
+vector<string> cpp_strtok(string src, string dlm)
 {
-    vector<string> tokens;
-    string s = "";
-    for(int i = 0; i < str.size(); ++i)
+    string::size_type p, start=0, len=src.length();
+    vector<string> v;
+
+    start = src.find_first_not_of(dlm);
+    p = src.find_first_of(dlm, start);
+    while(p != string::npos)
     {
-        if(str[i] == del)
-        {
-            tokens.push_back(s);
-            s = "";
-        }
-        else
-            s += str[i];
+        v.push_back(src.substr(start, p-start));
+        start = src.find_first_not_of(dlm, p);
+        p = src.find_first_of(dlm, start);
     }
-    tokens.push_back(s);
-    return tokens;
+    if(len > start)
+        v.push_back(src.substr(start, len - start));
+
+    return v;
 }
 
 int main(const int argc, const char **inputFile)
@@ -62,13 +63,11 @@ int main(const int argc, const char **inputFile)
             if(('\r' == s[s.size()-1]))//in some files there is a carriage return at the end, don't know why. This command removes it
                 s[s.size()-1] = 0;
 
-            vector<string> splitted = split(s, ' ');
+            vector<string> splitted = cpp_strtok(s, " ");
             string value1 = splitted[0], value2, value3;
             if(splitted.size() == 3)
                 value2 = splitted[1], value3 = splitted[2];
 
-
-            cout << value1 << " " << value2 << " " << value3 << endl;
             if(value1 == "EDGE_WEIGHT_TYPE")
             {
                 if(value3 != "EUC_2D" && value3 != "ATT" && value3 != "CEIL_2D")

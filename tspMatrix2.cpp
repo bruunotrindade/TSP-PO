@@ -38,7 +38,6 @@ int main(const int argc, const char **inputFile)
 		char* value1 = strtok(s," "); //creating sub-strings separated by space
 		char* value2 = strtok(NULL," ");
 		char* value3 = strtok(NULL," ");
-        printf("%s %s %s\n", value1, value2, value3);
 		if(!strcmp(value1, "EDGE_WEIGHT_TYPE"))
 		{ //verify if the instance is of type EUC_2D, ATT or CEIL_2D, only the calculation for these types were implemented
 			if(strcmp(value3, "EUC_2D") && strcmp(value3, "ATT") && strcmp(value3, "CEIL_2D"))
