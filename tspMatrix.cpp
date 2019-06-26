@@ -2,7 +2,19 @@
 
 using namespace std;
 
+struct Caminho
+{
+    int dist = INT_MAX, ind;
+};
+
+struct Solucao
+{
+    vector<Caminho> caminhos;
+    int distTotal = 0;
+};
+
 int **distanceMatrix, size=-1, pos=0;
+Solucao *solucoes;
 
 int calculateTourDistance(int *tour)//calculate the distance of a tour
 {
@@ -33,6 +45,48 @@ vector<string> cpp_strtok(string src, string dlm)
 
     return v;
 }
+
+Caminho menorDaLinha(int i, bool visitados[])
+{
+    Caminho caminho;
+    for(int j = 0; j < size; ++j)
+    {
+        if(distanceMatrix[i][j] < caminho.dist && !visitados[j])
+        {
+            caminho.dist = distanceMatrix[i][j];
+            caminho.ind = j;
+        }
+    }
+
+    return caminho;
+}
+
+void gerarSolucoes()
+{
+    for(int i = 0; i < size; ++i)
+    {
+        bool visitados[size] = {false};
+        int contVisitados = 1, j = i;
+        visitados[i] = true;
+        Caminho menor;
+        while(contVisitados < size)
+        {
+            menor = menorDaLinha(j, visitados);
+            j = menor.ind;
+            solucoes[i].caminhos.push_back(menor);
+            solucoes[i].distTotal += menor.dist;
+            visitados[j] = true;
+            contVisitados += 1;
+        }
+        //Retornar para a cidade de origem
+        Caminho volta;
+        volta.dist = menor.dist;
+        volta.ind = i;
+        solucoes[i].caminhos.push_back(volta);
+        solucoes[i].distTotal += volta.dist;
+    }
+}
+
 
 int main(const int argc, const char **inputFile)
 {
@@ -87,6 +141,10 @@ int main(const int argc, const char **inputFile)
             {//read the dimension from the header and allocate memory for the cities
                 size = stoi(value3);
                 distanceMatrix = (int**)malloc(size * sizeof(int*));
+                solucoes = new Solucao[size];
+
+
+
                 x = (double*)malloc(size * sizeof(double*));
                 y = (double*)malloc(size * sizeof(double*));
 
@@ -125,8 +183,9 @@ int main(const int argc, const char **inputFile)
 				double yd = y[i]-y[j];
 				double dist = sqrt(xd*xd+yd*yd);
 				distanceMatrix[i][j] = (int)(dist+0.5);//calculating the euclidean distance, rounding to int and storing in the distance matrix
-                //cout << distanceMatrix[i][j] << " ";
+				cout << distanceMatrix[i][j] << " ";
 			}
+			cout << endl;
 		}
 	}
 	else if(type == "CEIL_2D")
@@ -165,5 +224,17 @@ int main(const int argc, const char **inputFile)
 		tour[i] = i;
 
 	printf("Comprimento da rota: %d\n", calculateTourDistance(tour));
+
+
+    gerarSolucoes();
+
+
+    for(int i = 0; i < size; ++i)
+    {
+        printf("Cidade %d | Total = %d\n", i, solucoes[i].distTotal);
+        for(int j = 0; j < size; ++j)
+            cout << solucoes[i].caminhos[j].ind << " ";
+        cout << endl;
+    }
     return 0;
 }
