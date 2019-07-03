@@ -1,4 +1,6 @@
 #include <bits/stdc++.h>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -80,13 +82,104 @@ void gerarSolucoes()
         }
         //Retornar para a cidade de origem
         Caminho volta;
-        volta.dist = menor.dist;
+        volta.dist = distanceMatrix[j][i];
         volta.ind = i;
         solucoes[i].caminhos.push_back(volta);
         solucoes[i].distTotal += volta.dist;
     }
 }
+/*
+0 1 5 2
+1 0 3 7
+5 3 0 9
+2 7 9 0
 
+
+1 -> 2 -> 3 -> 0
+(1, 3, 9, 2) = 15
+
+
+3 -> 2 -> 1 -> 0
+(1, 3, 9, 2) = 15;
+
+
+int indAnteriorC1 = s.caminhos[rand1-1].ind;
+
+Caminho anterior = s.caminhos[rand1-1];
+c1.dist = distanceMatrix[anterior.ind][c1.ind];
+
+Caminho proximo = s.caminhos[rand+1];
+proximo.dist = distanceMatrix[c1.ind][proximo.ind];
+
+
+3 -> 2 -> 1 -> 0
+(2, 3, 3, 1) = 9
+*/
+
+void atualizarSolucao(Solucao &s, int origem, int indice)
+{
+    Caminho &c1 = s.caminhos[indice];
+
+    s.distTotal -= c1.dist;
+
+    Caminho &anterior = s.caminhos[indice-1];
+    if(indice == 0)
+        c1.dist = distanceMatrix[origem][c1.ind];
+    else
+        c1.dist = distanceMatrix[anterior.ind][c1.ind];
+
+    s.distTotal += c1.dist;
+
+    Caminho &proximo = s.caminhos[indice+1];
+    s.distTotal -= proximo.dist;
+    proximo.dist = distanceMatrix[c1.ind][proximo.ind];
+
+    s.distTotal += proximo.dist;
+}
+
+Solucao tweak(Solucao s, int origem)
+{
+    int rand1 = rand() % (size - 1), rand2;
+
+    do
+    {
+        rand2 = rand() % (size - 1);
+    }
+    while(rand1 == rand2);
+    swap(s.caminhos[rand1], s.caminhos[rand2]);
+    atualizarSolucao(s, origem, rand1);
+    atualizarSolucao(s, origem, rand2);
+
+    return s;
+}
+
+Solucao simulated_annealing(int i)
+{
+    Solucao S = solucoes[i], best = S;
+    int temp = size * 1000;
+    const int TEMPO_MAX = 2000000;
+    printf("Cidade %d - Progresso\n", i);
+    float percent = 0;
+    for(int tempo = 1; tempo <= TEMPO_MAX; ++tempo)
+    {
+        if((tempo/(float)TEMPO_MAX)*100 > percent)
+        {
+            percent = tempo*100/(float)TEMPO_MAX;
+            cout << "\r[" << static_cast<int>(percent) << '%' << "] " << flush;
+        }
+
+        Solucao R = tweak(S, i);
+        if(R.distTotal < S.distTotal || rand() % 2 < exp((R.distTotal-S.distTotal)/temp))
+            S = R;
+
+        temp -= temp * tempo/TEMPO_MAX;
+        if(S.distTotal < best.distTotal)
+            best = S;
+
+    }
+    cout << "\n\n";
+    return best;
+}
 
 int main(const int argc, const char **inputFile)
 {
@@ -142,8 +235,6 @@ int main(const int argc, const char **inputFile)
                 size = stoi(value3);
                 distanceMatrix = (int**)malloc(size * sizeof(int*));
                 solucoes = new Solucao[size];
-
-
 
                 x = (double*)malloc(size * sizeof(double*));
                 y = (double*)malloc(size * sizeof(double*));
@@ -225,8 +316,23 @@ int main(const int argc, const char **inputFile)
 
 	printf("Comprimento da rota: %d\n", calculateTourDistance(tour));
 
-
     gerarSolucoes();
+
+    printf("\n|====| GULOSO |====|\n");
+    for(int i = 0; i < size; ++i)
+    {
+        printf("Cidade %d | Total = %d\n", i, solucoes[i].distTotal);
+        for(int j = 0; j < size; ++j)
+            cout << solucoes[i].caminhos[j].ind << " ";
+        cout << endl;
+    }
+
+    printf("\n|====| SIMULATED ANNEALING |====|\n");
+    srand(time(NULL));
+    for(int i = 0; i < size; ++i)
+        solucoes[i] = simulated_annealing(i);
+
+    printf("\n|====| CAMINHOS NOVOS POS-SIMULATED ANNEALING |====|\n");
 
 
     for(int i = 0; i < size; ++i)
@@ -238,3 +344,18 @@ int main(const int argc, const char **inputFile)
     }
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
