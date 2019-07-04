@@ -88,33 +88,6 @@ void gerarSolucoes()
         solucoes[i].distTotal += volta.dist;
     }
 }
-/*
-0 1 5 2
-1 0 3 7
-5 3 0 9
-2 7 9 0
-
-
-1 -> 2 -> 3 -> 0
-(1, 3, 9, 2) = 15
-
-
-3 -> 2 -> 1 -> 0
-(1, 3, 9, 2) = 15;
-
-
-int indAnteriorC1 = s.caminhos[rand1-1].ind;
-
-Caminho anterior = s.caminhos[rand1-1];
-c1.dist = distanceMatrix[anterior.ind][c1.ind];
-
-Caminho proximo = s.caminhos[rand+1];
-proximo.dist = distanceMatrix[c1.ind][proximo.ind];
-
-
-3 -> 2 -> 1 -> 0
-(2, 3, 3, 1) = 9
-*/
 
 void atualizarSolucao(Solucao &s, int origem, int indice)
 {
@@ -157,15 +130,16 @@ Solucao simulated_annealing(int i)
 {
     Solucao S = solucoes[i], best = S;
     int temp = size * 1000;
-    const int TEMPO_MAX = 2000000;
-    printf("Cidade %d - Progresso\n", i);
+    const int TEMPO_MAX = size*30000;//5000000;
+    printf("Cidade %d - Progresso: ", i);
     float percent = 0;
     for(int tempo = 1; tempo <= TEMPO_MAX; ++tempo)
     {
         if((tempo/(float)TEMPO_MAX)*100 > percent)
         {
             percent = tempo*100/(float)TEMPO_MAX;
-            cout << "\r[" << static_cast<int>(percent) << '%' << "] " << flush;
+            printf("\rCidade %d - Progresso: ", i);
+            cout << "[" << static_cast<int>(percent) << '%' << "] " << flush;
         }
 
         Solucao R = tweak(S, i);
@@ -177,7 +151,7 @@ Solucao simulated_annealing(int i)
             best = S;
 
     }
-    cout << "\n\n";
+    cout << "\n";
     return best;
 }
 
@@ -333,9 +307,7 @@ int main(const int argc, const char **inputFile)
     for(int i = 0; i < size; ++i)
         solucoesSA[i] = simulated_annealing(i);
 
-    printf("\n|====| CAMINHOS MELHORADOS POS-SIMULATED ANNEALING |====|\n");
-
-
+    printf("\n|====| CAMINHO(S) MELHORADO(S) POS-SIMULATED ANNEALING |====|\n");
     for(int i = 0; i < size; ++i)
     {
         if(solucoes[i].distTotal == solucoesSA[i].distTotal)
@@ -346,20 +318,30 @@ int main(const int argc, const char **inputFile)
             cout << solucoesSA[i].caminhos[j].ind << " ";
         cout << endl << endl;
     }
+
+    int menores[size], menor = INT_MAX, numMenores = 0;
+    for(int i = 0; i < size; ++i)
+    {
+        if(solucoesSA[i].distTotal < menor)
+        {
+            menor = solucoesSA[i].distTotal;
+            numMenores = 0;
+            menores[numMenores++] = i;    
+        }
+        else if(solucoesSA[i].distTotal == menor)
+            menores[numMenores++] = i; 
+    }
+    printf("\n|====| MENOR(ES) CAMINHO(S) ENCONTRADO(S) |====|\n");
+    for(int i = 0; i < numMenores; i++)
+    {
+        int melhor = menores[i];
+        printf("Cidade de Origem: %d\n", melhor);
+        printf("Distancia: %d\n", solucoesSA[melhor].distTotal);
+        printf("Caminho: ");
+        for(int j = 0; j < numMenores; ++j)
+            cout << solucoesSA[melhor].caminhos[j].ind << " ";
+        cout << endl << endl;
+    }
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
