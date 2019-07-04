@@ -322,10 +322,10 @@ int main(const int argc, const char **inputFile)
     printf("\n|====| GULOSO |====|\n");
     for(int i = 0; i < size; ++i)
     {
-        printf("Cidade %d | Total = %d\n\n", i, solucoes[i].distTotal);
+        printf("Cidade %d | Total = %d\n", i, solucoes[i].distTotal);
         for(int j = 0; j < size; ++j)
             cout << solucoes[i].caminhos[j].ind << " ";
-        cout << endl;
+        cout << endl << endl;
     }
 
     printf("\n|====| SIMULATED ANNEALING |====|\n");
@@ -341,10 +341,10 @@ int main(const int argc, const char **inputFile)
         if(solucoes[i].distTotal == solucoesSA[i].distTotal)
             continue;
 
-        printf("Cidade %d | Anterior %d | Novo = %d\n\n", i, solucoes[i].distTotal, solucoesSA[i].distTotal);
+        printf("Cidade %d | Anterior = %d | Novo = %d\n", i, solucoes[i].distTotal, solucoesSA[i].distTotal);
         for(int j = 0; j < size; ++j)
             cout << solucoesSA[i].caminhos[j].ind << " ";
-        cout << endl;
+        cout << endl << endl;
     }
     return 0;
 }
