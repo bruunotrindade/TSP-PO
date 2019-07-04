@@ -16,7 +16,7 @@ struct Solucao
 };
 
 int **distanceMatrix, size=-1, pos=0;
-Solucao *solucoes;
+Solucao *solucoes, *solucoesSA;
 
 int calculateTourDistance(int *tour)//calculate the distance of a tour
 {
@@ -235,6 +235,7 @@ int main(const int argc, const char **inputFile)
                 size = stoi(value3);
                 distanceMatrix = (int**)malloc(size * sizeof(int*));
                 solucoes = new Solucao[size];
+                solucoesSA = new Solucao[size];
 
                 x = (double*)malloc(size * sizeof(double*));
                 y = (double*)malloc(size * sizeof(double*));
@@ -321,7 +322,7 @@ int main(const int argc, const char **inputFile)
     printf("\n|====| GULOSO |====|\n");
     for(int i = 0; i < size; ++i)
     {
-        printf("Cidade %d | Total = %d\n", i, solucoes[i].distTotal);
+        printf("Cidade %d | Total = %d\n\n", i, solucoes[i].distTotal);
         for(int j = 0; j < size; ++j)
             cout << solucoes[i].caminhos[j].ind << " ";
         cout << endl;
@@ -330,16 +331,19 @@ int main(const int argc, const char **inputFile)
     printf("\n|====| SIMULATED ANNEALING |====|\n");
     srand(time(NULL));
     for(int i = 0; i < size; ++i)
-        solucoes[i] = simulated_annealing(i);
+        solucoesSA[i] = simulated_annealing(i);
 
-    printf("\n|====| CAMINHOS NOVOS POS-SIMULATED ANNEALING |====|\n");
+    printf("\n|====| CAMINHOS MELHORADOS POS-SIMULATED ANNEALING |====|\n");
 
 
     for(int i = 0; i < size; ++i)
     {
-        printf("Cidade %d | Total = %d\n", i, solucoes[i].distTotal);
+        if(solucoes[i].distTotal == solucoesSA[i].distTotal)
+            continue;
+
+        printf("Cidade %d | Anterior %d | Novo = %d\n\n", i, solucoes[i].distTotal, solucoesSA[i].distTotal);
         for(int j = 0; j < size; ++j)
-            cout << solucoes[i].caminhos[j].ind << " ";
+            cout << solucoesSA[i].caminhos[j].ind << " ";
         cout << endl;
     }
     return 0;
